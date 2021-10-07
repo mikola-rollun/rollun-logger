@@ -44,6 +44,11 @@ class MetricsMiddleware implements MiddlewareInterface
             }
         }
 
+        // 404 response
+        if (empty($metrics)) {
+            return $handler->handle($request);
+        }
+
         return HttpResponse::fromMetricCollections( ...$metrics )
             ->withHeader( 'Content-Type', 'text/plain; charset=utf-8' );
     }

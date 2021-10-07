@@ -312,6 +312,7 @@ class ConfigProvider
         return [
             MetricsMiddlewareAbstractFactory::KEY => [
                 MetricsMiddleware::class => [
+                    MetricsMiddlewareAbstractFactory::KEY_CLASS => MetricsMiddleware::class,
                     MetricsMiddlewareAbstractFactory::KEY_METRIC_PROVIDERS => [
                         FailedProcessesMetricProvider::class,
                     ],
@@ -319,7 +320,8 @@ class ConfigProvider
             ],
             FailedProcessesMetricProviderAbstractFactory::KEY => [
                 FailedProcessesMetricProvider::class => [
-                    'dirPath' => 'data/process-tracking',
+                    FailedProcessesMetricProviderAbstractFactory::KEY_CLASS => FailedProcessesMetricProvider::class,
+                    FailedProcessesMetricProviderAbstractFactory::KEY_DIR_PATH => 'data/process-tracking',
                 ],
             ],
         ];
