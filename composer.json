@@ -27,7 +27,8 @@
     "psr/http-server-middleware": "^1.0",
     "zendframework/zend-mail": "^2.10",
     "zendframework/zend-cache": "^2.9",
-    "rollun-com/rollun-utils": "^5.0"
+    "rollun-com/rollun-utils": "^5.0",
+    "openmetrics-php/exposition-text": "^0.3.1"
   },
   "suggest": {
   },

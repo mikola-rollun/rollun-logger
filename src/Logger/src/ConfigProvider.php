@@ -12,6 +12,10 @@ use rollun\logger\Formatter\ContextToString;
 use rollun\logger\Formatter\FluentdFormatter;
 use rollun\logger\Formatter\LogStashFormatter;
 use rollun\logger\Formatter\SlackFormatter;
+use rollun\logger\Metrics\Factory\FailedProcessesMetricProviderAbstractFactory;
+use rollun\logger\Metrics\Factory\MetricsMiddlewareAbstractFactory;
+use rollun\logger\Metrics\FailedProcessesMetricProvider;
+use rollun\logger\Metrics\MetricsMiddleware;
 use rollun\logger\Middleware\Factory\RequestLoggedMiddlewareFactory;
 use rollun\logger\Middleware\RequestLoggedMiddleware;
 use rollun\logger\Processor\ExceptionBacktrace;
@@ -37,13 +41,17 @@ class ConfigProvider
      */
     public function __invoke()
     {
-        return [
+        $config = [
             "dependencies"   => $this->getDependencies(),
             "log"            => $this->getLog(),
             'log_processors' => $this->getLogProcessors(),
             'log_formatters' => $this->getLogFormatters(),
             'log_writers'    => $this->getLogWriters(),
         ];
+
+        $metricsConfig = $this->getMetricsConfig();
+
+        return array_merge($config, $metricsConfig);
     }
 
     protected function getLogProcessors()
@@ -88,6 +96,8 @@ class ConfigProvider
         return [
             'abstract_factories' => [
                 LoggerAbstractServiceFactory::class,
+                MetricsMiddlewareAbstractFactory::class,
+                FailedProcessesMetricProviderAbstractFactory::class,
             ],
             'factories'          => [
                 Logger::class         => LoggerServiceFactory::class,
@@ -292,6 +302,24 @@ class ConfigProvider
                     [
                         'name' => LifeCycleTokenInjector::class,
                     ],
+                ],
+            ],
+        ];
+    }
+
+    protected function getMetricsConfig(): array
+    {
+        return [
+            MetricsMiddlewareAbstractFactory::KEY => [
+                MetricsMiddleware::class => [
+                    MetricsMiddlewareAbstractFactory::KEY_METRIC_PROVIDERS => [
+                        FailedProcessesMetricProvider::class,
+                    ],
+                ],
+            ],
+            FailedProcessesMetricProviderAbstractFactory::KEY => [
+                FailedProcessesMetricProvider::class => [
+                    'dirPath' => 'data/process-tracking',
                 ],
             ],
         ];
