@@ -12,9 +12,9 @@ use rollun\logger\Formatter\ContextToString;
 use rollun\logger\Formatter\FluentdFormatter;
 use rollun\logger\Formatter\LogStashFormatter;
 use rollun\logger\Formatter\SlackFormatter;
-use rollun\logger\Metrics\Factory\FailedProcessesMetricProviderAbstractFactory;
+use rollun\logger\Metrics\Factory\FilesCountMetricProviderAbstractFactory;
 use rollun\logger\Metrics\Factory\MetricsMiddlewareAbstractFactory;
-use rollun\logger\Metrics\FailedProcessesMetricProvider;
+use rollun\logger\Metrics\FilesCountMetricProvider;
 use rollun\logger\Metrics\MetricsMiddleware;
 use rollun\logger\Middleware\Factory\RequestLoggedMiddlewareFactory;
 use rollun\logger\Middleware\RequestLoggedMiddleware;
@@ -97,7 +97,7 @@ class ConfigProvider
             'abstract_factories' => [
                 LoggerAbstractServiceFactory::class,
                 MetricsMiddlewareAbstractFactory::class,
-                FailedProcessesMetricProviderAbstractFactory::class,
+                FilesCountMetricProviderAbstractFactory::class,
             ],
             'factories'          => [
                 Logger::class         => LoggerServiceFactory::class,
@@ -314,14 +314,15 @@ class ConfigProvider
                 MetricsMiddleware::class => [
                     MetricsMiddlewareAbstractFactory::KEY_CLASS => MetricsMiddleware::class,
                     MetricsMiddlewareAbstractFactory::KEY_METRIC_PROVIDERS => [
-                        FailedProcessesMetricProvider::class,
+                        'FailedProcessesMetricProvider',
                     ],
                 ],
             ],
-            FailedProcessesMetricProviderAbstractFactory::KEY => [
-                FailedProcessesMetricProvider::class => [
-                    FailedProcessesMetricProviderAbstractFactory::KEY_CLASS => FailedProcessesMetricProvider::class,
-                    FailedProcessesMetricProviderAbstractFactory::KEY_DIR_PATH => 'data/process-tracking',
+            FilesCountMetricProviderAbstractFactory::KEY => [
+                'FailedProcessesMetricProvider' => [
+                    FilesCountMetricProviderAbstractFactory::KEY_CLASS => FilesCountMetricProvider::class,
+                    FilesCountMetricProviderAbstractFactory::KEY_METRIC_NAME => 'failed_processes',
+                    FilesCountMetricProviderAbstractFactory::KEY_DIR_PATH => 'data/process-tracking',
                 ],
             ],
         ];
