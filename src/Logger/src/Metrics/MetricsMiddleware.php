@@ -12,7 +12,7 @@ use rollun\dic\InsideConstruct;
 
 class MetricsMiddleware implements MiddlewareInterface
 {
-    /** @var array<MetricProvider> */
+    /** @var array<MetricProviderInterface> */
     protected $metricProviders;
 
     /** @var LoggerInterface */

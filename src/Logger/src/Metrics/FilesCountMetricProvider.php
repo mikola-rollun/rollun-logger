@@ -8,7 +8,7 @@ use OpenMetricsPhp\Exposition\Text\Metrics\Gauge;
 use OpenMetricsPhp\Exposition\Text\Types\Label;
 use OpenMetricsPhp\Exposition\Text\Types\MetricName;
 
-class FilesCountMetricProvider implements MetricProvider
+class FilesCountMetricProvider implements MetricProviderInterface
 {
     /** @var string */
     protected $metricName;

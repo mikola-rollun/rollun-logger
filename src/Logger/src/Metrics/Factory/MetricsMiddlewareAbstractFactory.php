@@ -3,6 +3,7 @@
 namespace rollun\logger\Metrics\Factory;
 
 use Interop\Container\ContainerInterface;
+use rollun\logger\Metrics\MetricProviderInterface;
 use rollun\logger\Metrics\MetricsMiddleware;
 use rollun\utils\Factory\AbstractAbstractFactory;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
@@ -22,9 +23,10 @@ class MetricsMiddlewareAbstractFactory extends AbstractAbstractFactory
     {
         $config = $this->getServiceConfig($container, $requestedName);
 
+        $metricProvidersField = static::KEY_METRIC_PROVIDERS;
+
         if (!isset($config[static::KEY_METRIC_PROVIDERS])) {
-            $fieldName = static::KEY_METRIC_PROVIDERS;
-            throw new ServiceNotCreatedException("Dependency '$fieldName' is not set in config");
+            throw new ServiceNotCreatedException("Dependency '$metricProvidersField' is not set in config");
         }
 
         $metricProviderClasses = $config[static::KEY_METRIC_PROVIDERS];
@@ -32,7 +34,11 @@ class MetricsMiddlewareAbstractFactory extends AbstractAbstractFactory
         $metricProviders = [];
 
         foreach ($metricProviderClasses as $metricProviderClass) {
-            $metricProviders[] = $container->get($metricProviderClass);
+            $metricProvider = $container->get($metricProviderClass);
+            if (!$metricProvider instanceof MetricProviderInterface) {
+                throw new ServiceNotCreatedException("Dependency '$metricProvidersField' contains object that is not implementing required interface");
+            }
+            $metricProviders[] = $metricProvider;
         }
 
         $class = $config[static::KEY_CLASS] ?? static::DEFAULT_CLASS;
