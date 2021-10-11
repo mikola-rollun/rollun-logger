@@ -14,7 +14,7 @@ class ClearOldProcessFilesCallback
 
         $dirsByDate = glob($dirPath . '*', GLOB_ONLYDIR);
 
-        if ($dirsByDate === false) {
+        if (empty($dirsByDate)) {
             return;
         }
 
