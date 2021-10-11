@@ -10,11 +10,8 @@
 
 ### Пример конфига:
 ```
-use rollun\logger\Metrics\Factory\FilesCountMetricProviderAbstractFactory;
 use rollun\logger\Metrics\Factory\MetricsMiddlewareAbstractFactory;
-use rollun\logger\Metrics\FilesCountMetricProvider;
 use rollun\logger\Metrics\MetricsMiddleware;
-
 
 MetricsMiddlewareAbstractFactory::KEY => [
     MetricsMiddleware::class => [
@@ -23,13 +20,6 @@ MetricsMiddlewareAbstractFactory::KEY => [
             'FailedProcessesMetricProvider',
             // other providers...
         ],
-    ],
-],
-FilesCountMetricProviderAbstractFactory::KEY => [
-    'FailedProcessesMetricProvider' => [
-        FilesCountMetricProviderAbstractFactory::KEY_CLASS => FilesCountMetricProvider::class,
-        FilesCountMetricProviderAbstractFactory::KEY_METRIC_NAME => 'failed_processes',
-        FilesCountMetricProviderAbstractFactory::KEY_DIR_PATH => getenv('PROCESS_TRACKING_DIR') ?: LifeCycleToken::PROCESS_TRACKING_DIR,
     ],
 ],
 ```
