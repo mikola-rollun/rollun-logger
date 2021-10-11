@@ -19,6 +19,8 @@ class LifeCycleToken implements Serializable
     // If sent parent token not equals to system, system patent token write with this name
     const KEY_ORIGINAL_PARENT_LIFECYCLE_TOKEN = "original_parent_lifecycle_token";
 
+    const PROCESS_TRACKING_DIR = 'data/process-tracking/';
+
     /**
      * @var string
      */
@@ -127,11 +129,10 @@ class LifeCycleToken implements Serializable
         return ($arh);
     }
 
-    /**
-     * @param string $dirPath Dir for files with process info
-     */
-    public function createFile(string $dirPath)
+    public function createFile()
     {
+        $dirPath = getenv('PROCESS_TRACKING_DIR') ?: self::PROCESS_TRACKING_DIR;
+
         $dirPath .= (new \DateTime())->format('Y-m-d') . '/';
 
         if (!file_exists($dirPath)) {

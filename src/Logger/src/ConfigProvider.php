@@ -12,6 +12,7 @@ use rollun\logger\Formatter\ContextToString;
 use rollun\logger\Formatter\FluentdFormatter;
 use rollun\logger\Formatter\LogStashFormatter;
 use rollun\logger\Formatter\SlackFormatter;
+use rollun\logger\Metrics\Callback\ClearOldProcessFilesCallback;
 use rollun\logger\Metrics\Factory\FilesCountMetricProviderAbstractFactory;
 use rollun\logger\Metrics\Factory\MetricsMiddlewareAbstractFactory;
 use rollun\logger\Metrics\FilesCountMetricProvider;
@@ -114,7 +115,8 @@ class ConfigProvider
             ],
             'invokables'         => [
                 PushGateway::class => PushGateway::class,
-                Collector::class   => Collector::class
+                Collector::class   => Collector::class,
+                ClearOldProcessFilesCallback::class => ClearOldProcessFilesCallback::class,
             ],
             'aliases'            => [],
         ];
@@ -322,7 +324,7 @@ class ConfigProvider
                 'FailedProcessesMetricProvider' => [
                     FilesCountMetricProviderAbstractFactory::KEY_CLASS => FilesCountMetricProvider::class,
                     FilesCountMetricProviderAbstractFactory::KEY_METRIC_NAME => 'failed_processes',
-                    FilesCountMetricProviderAbstractFactory::KEY_DIR_PATH => 'data/process-tracking',
+                    FilesCountMetricProviderAbstractFactory::KEY_DIR_PATH => getenv('PROCESS_TRACKING_DIR') ?: LifeCycleToken::PROCESS_TRACKING_DIR,
                 ],
             ],
         ];
