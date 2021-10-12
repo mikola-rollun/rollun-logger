@@ -19,8 +19,6 @@ class LifeCycleToken implements Serializable
     // If sent parent token not equals to system, system patent token write with this name
     const KEY_ORIGINAL_PARENT_LIFECYCLE_TOKEN = "original_parent_lifecycle_token";
 
-    const PROCESS_TRACKING_DIR = 'data/process-tracking/';
-
     /**
      * @var string
      */
@@ -30,11 +28,6 @@ class LifeCycleToken implements Serializable
      * @var self
      */
     private $parentToken;
-
-    /**
-     * @var string
-     */
-    private $filePath;
 
     /**
      * Token constructor.
@@ -127,46 +120,6 @@ class LifeCycleToken implements Serializable
         }
 
         return ($arh);
-    }
-
-    public function createFile()
-    {
-        $dirPath = getenv('PROCESS_TRACKING_DIR') ?: self::PROCESS_TRACKING_DIR;
-
-        $dirPath .= (new \DateTime())->format('Y-m-d') . '/';
-
-        if (!file_exists($dirPath)) {
-            $isDirCreated = mkdir($dirPath, 0777, true);
-            if (!$isDirCreated) {
-                return;
-            }
-        }
-
-        $this->filePath = $dirPath . $this->token;
-
-        $requestInfo = '';
-
-        if (!empty($this->parentToken->token)) {
-            $requestInfo .= 'parent_lifecycle_token: ' . $this->parentToken->token . PHP_EOL;
-        }
-
-        if (!empty($_SERVER['REMOTE_ADDR'])) {
-            $requestInfo .= 'REMOTE_ADDR: ' . $_SERVER['REMOTE_ADDR'] . PHP_EOL;
-        }
-
-        if (!empty($_SERVER['REQUEST_URI'])) {
-            $requestInfo .= 'REQUEST_URI: ' . $_SERVER['REQUEST_URI'] . PHP_EOL;
-        }
-
-        file_put_contents($this->filePath, $requestInfo);
-    }
-
-    public function removeFile()
-    {
-        if (!is_string($this->filePath)) {
-            return;
-        }
-        unlink($this->filePath);
     }
 
     /**
