@@ -12,7 +12,7 @@ class ClearOldProcessesDataCallback
     /** @var ProcessTrackerInterface */
     protected $processTracker;
 
-    public function __construct(ProcessTrackerInterface $processTracker)
+    public function __construct(ProcessTrackerInterface $processTracker = null)
     {
         InsideConstruct::init([
             'processTracker' => ProcessTrackerInterface::class,

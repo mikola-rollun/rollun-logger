@@ -26,7 +26,10 @@ class ConfigProvider
                 'FailedProcessesCountMetricProvider' => [
                     CallbackMetricProviderAbstractFactory::KEY_CLASS => CallbackMetricProvider::class,
                     CallbackMetricProviderAbstractFactory::KEY_METRIC_NAME => 'failed_processes',
-                    CallbackMetricProviderAbstractFactory::KEY_CALLBACK => GetFailedProcessesCountCallback::class,
+                    CallbackMetricProviderAbstractFactory::KEY_CALLBACK => function() {
+                        $callback = new GetFailedProcessesCountCallback();
+                        return $callback();
+                    }
                 ],
             ],
         ];
@@ -38,6 +41,7 @@ class ConfigProvider
             'abstract_factories' => [
                 MetricsMiddlewareAbstractFactory::class,
                 FilesCountMetricProviderAbstractFactory::class,
+                CallbackMetricProviderAbstractFactory::class,
             ],
             'invokables' => [
                 ProcessTracker::class => ProcessTracker::class,

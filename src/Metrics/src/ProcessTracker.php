@@ -2,7 +2,6 @@
 
 namespace rollun\metrics;
 
-use rollun\dic\InsideConstruct;
 use rollun\logger\LifeCycleToken;
 
 class ProcessTracker implements ProcessTrackerInterface
@@ -15,11 +14,9 @@ class ProcessTracker implements ProcessTrackerInterface
     /** @var string */
     protected $filePath;
 
-    public function __construct(LifeCycleToken $lifeCycleToken = null)
+    public function __construct(LifeCycleToken $lifeCycleToken)
     {
-        InsideConstruct::init([
-            'lifeCycleToken' => LifeCycleToken::class,
-        ]);
+        $this->lifeCycleToken = $lifeCycleToken;
     }
 
     public function storeProcessData()
