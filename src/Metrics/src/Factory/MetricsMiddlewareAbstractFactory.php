@@ -1,10 +1,10 @@
 <?php
 
-namespace rollun\logger\Metrics\Factory;
+namespace rollun\metrics\Factory;
 
 use Interop\Container\ContainerInterface;
-use rollun\logger\Metrics\MetricProviderInterface;
-use rollun\logger\Metrics\MetricsMiddleware;
+use rollun\metrics\MetricProviderInterface;
+use rollun\metrics\MetricsMiddleware;
 use rollun\utils\Factory\AbstractAbstractFactory;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 

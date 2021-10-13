@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\logger\Metrics;
+namespace rollun\metrics;
 
 use OpenMetricsPhp\Exposition\Text\Collections\CounterCollection;
 use OpenMetricsPhp\Exposition\Text\Collections\GaugeCollection;
@@ -9,11 +9,15 @@ use OpenMetricsPhp\Exposition\Text\Metrics\Counter;
 use OpenMetricsPhp\Exposition\Text\Metrics\Gauge;
 use OpenMetricsPhp\Exposition\Text\Types\Label;
 use OpenMetricsPhp\Exposition\Text\Types\MetricName;
-use rollun\callback\Callback\SerializedCallback;
 
 class CallbackMetricProvider implements MetricProviderInterface
 {
-    /** @var SerializedCallback */
+    use GetServiceName;
+
+    const METRIC_TYPE_GAUGE = 'gauge';
+    const METRIC_TYPE_COUNTER = 'counter';
+
+    /** @var callable */
     protected $callback;
 
     /** @var string */
@@ -28,23 +32,21 @@ class CallbackMetricProvider implements MetricProviderInterface
     /** @var string */
     protected $labelValue;
 
+    /**
+     * @throws \Exception
+     */
     public function __construct(
-        SerializedCallback $callback,
+        callable $callback,
         string $metricName,
-        string $metricType,
-        string $labelName = null,
+        string $metricType = self::METRIC_TYPE_GAUGE,
+        string $labelName = 'service_name',
         string $labelValue = null
     ) {
         $this->callback = $callback;
         $this->metricName = $metricName;
         $this->metricType = $metricType;
-        if (is_null($labelName) && is_null($labelValue)) {
-            $this->labelName = 'service_name';
-            $this->labelValue = $this->getServiceName();
-        } else {
-            $this->labelName = $labelName;
-            $this->labelValue = $labelValue;
-        }
+        $this->labelName = $labelName;
+        $this->labelValue = $labelName === 'service_name' && is_null($labelValue) ? $this->getServiceName() : $labelValue;
     }
 
     /**
@@ -52,42 +54,23 @@ class CallbackMetricProvider implements MetricProviderInterface
      */
     public function getMetric(): ProvidesMetricLines
     {
-        $callback = $this->callback;
+        $metricValue = ($this->callback)();
+        $metricName = MetricName::fromString($this->metricName);
         $label = Label::fromNameAndValue( $this->labelName, $this->labelValue );
 
         switch ($this->metricType) {
-            case 'gauge':
+            case self::METRIC_TYPE_GAUGE:
                 return GaugeCollection::fromGauges(
-                    MetricName::fromString($this->metricName),
-                    Gauge::fromValue($callback())->withLabels($label)
+                    $metricName,
+                    Gauge::fromValue($metricValue)->withLabels($label)
                 );
-            case 'counter':
+            case self::METRIC_TYPE_COUNTER:
                 return CounterCollection::fromCounters(
-                    MetricName::fromString($this->metricName),
-                    Counter::fromValue($callback())->withLabels($label)
+                    $metricName,
+                    Counter::fromValue($metricValue)->withLabels($label)
                 );
             default:
                 throw new \Exception();
         }
-    }
-
-    /**
-     * @throws \Exception
-     */
-    protected function getServiceName(): string
-    {
-        $serviceName = exec('hostname');
-
-        if ($serviceName === false) {
-            throw new \Exception("Can't get service name");
-        }
-
-        $serviceNameParts = explode('.', $serviceName);
-
-        if (!empty($serviceNameParts)) {
-            $serviceName = $serviceNameParts[0];
-        }
-
-        return str_replace('-', '_', $serviceName);
     }
 }

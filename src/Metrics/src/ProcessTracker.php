@@ -1,8 +1,11 @@
 <?php
 
-namespace rollun\logger;
+namespace rollun\metrics;
 
-class ProcessTracker
+use rollun\dic\InsideConstruct;
+use rollun\logger\LifeCycleToken;
+
+class ProcessTracker implements ProcessTrackerInterface
 {
     private const PROCESS_TRACKING_DIR = 'data/process-tracking/';
 
@@ -12,12 +15,14 @@ class ProcessTracker
     /** @var string */
     protected $filePath;
 
-    public function __construct(LifeCycleToken $lifeCycleToken)
+    public function __construct(LifeCycleToken $lifeCycleToken = null)
     {
-        $this->lifeCycleToken = $lifeCycleToken;
+        InsideConstruct::init([
+            'lifeCycleToken' => LifeCycleToken::class,
+        ]);
     }
 
-    public function createFile()
+    public function storeProcessData()
     {
         $dirPath = $this->getProcessTrackingDir();
 
@@ -49,7 +54,7 @@ class ProcessTracker
         file_put_contents($this->filePath, $requestInfo);
     }
 
-    public function removeFile()
+    public function clearProcessData()
     {
         if (!is_string($this->filePath)) {
             return;
@@ -60,7 +65,7 @@ class ProcessTracker
     /**
      * @throws \Exception
      */
-    public function getFilesCount(): string
+    public function getFailedProcessesCount(): int
     {
         $dirPath = $this->getProcessTrackingDir();
 
@@ -70,10 +75,14 @@ class ProcessTracker
             throw new \Exception("Can't get files count for dir '$dirPath'");
         }
 
-        return $filesCount;
+        if (!is_numeric($filesCount)) {
+            throw new \Exception("Files count must be numeric");
+        }
+
+        return (int)$filesCount;
     }
 
-    public function clearOldFiles()
+    public function clearOldProcessesData()
     {
         $dirPath = $this->getProcessTrackingDir();
 

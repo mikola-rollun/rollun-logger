@@ -12,11 +12,6 @@ use rollun\logger\Formatter\ContextToString;
 use rollun\logger\Formatter\FluentdFormatter;
 use rollun\logger\Formatter\LogStashFormatter;
 use rollun\logger\Formatter\SlackFormatter;
-use rollun\logger\Metrics\Callback\ClearOldProcessFilesCallback;
-use rollun\logger\Metrics\Factory\FilesCountMetricProviderAbstractFactory;
-use rollun\logger\Metrics\Factory\MetricsMiddlewareAbstractFactory;
-use rollun\logger\Metrics\FilesCountMetricProvider;
-use rollun\logger\Metrics\MetricsMiddleware;
 use rollun\logger\Middleware\Factory\RequestLoggedMiddlewareFactory;
 use rollun\logger\Middleware\RequestLoggedMiddleware;
 use rollun\logger\Processor\ExceptionBacktrace;
@@ -42,17 +37,13 @@ class ConfigProvider
      */
     public function __invoke()
     {
-        $config = [
+        return [
             "dependencies"   => $this->getDependencies(),
             "log"            => $this->getLog(),
             'log_processors' => $this->getLogProcessors(),
             'log_formatters' => $this->getLogFormatters(),
             'log_writers'    => $this->getLogWriters(),
         ];
-
-        $metricsConfig = $this->getMetricsConfig();
-
-        return array_merge($config, $metricsConfig);
     }
 
     protected function getLogProcessors()
@@ -97,8 +88,6 @@ class ConfigProvider
         return [
             'abstract_factories' => [
                 LoggerAbstractServiceFactory::class,
-                MetricsMiddlewareAbstractFactory::class,
-                FilesCountMetricProviderAbstractFactory::class,
             ],
             'factories'          => [
                 Logger::class         => LoggerServiceFactory::class,
@@ -116,7 +105,6 @@ class ConfigProvider
             'invokables'         => [
                 PushGateway::class => PushGateway::class,
                 Collector::class   => Collector::class,
-                ClearOldProcessFilesCallback::class => ClearOldProcessFilesCallback::class,
             ],
             'aliases'            => [],
         ];
@@ -304,27 +292,6 @@ class ConfigProvider
                     [
                         'name' => LifeCycleTokenInjector::class,
                     ],
-                ],
-            ],
-        ];
-    }
-
-    protected function getMetricsConfig(): array
-    {
-        return [
-            MetricsMiddlewareAbstractFactory::KEY => [
-                MetricsMiddleware::class => [
-                    MetricsMiddlewareAbstractFactory::KEY_CLASS => MetricsMiddleware::class,
-                    MetricsMiddlewareAbstractFactory::KEY_METRIC_PROVIDERS => [
-                        'FailedProcessesMetricProvider',
-                    ],
-                ],
-            ],
-            FilesCountMetricProviderAbstractFactory::KEY => [
-                'FailedProcessesMetricProvider' => [
-                    FilesCountMetricProviderAbstractFactory::KEY_CLASS => FilesCountMetricProvider::class,
-                    FilesCountMetricProviderAbstractFactory::KEY_METRIC_NAME => 'failed_processes',
-                    FilesCountMetricProviderAbstractFactory::KEY_DIR_PATH => getenv('PROCESS_TRACKING_DIR') ?: LifeCycleToken::PROCESS_TRACKING_DIR,
                 ],
             ],
         ];

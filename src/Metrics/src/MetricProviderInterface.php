@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\logger\Metrics;
+namespace rollun\metrics;
 
 use OpenMetricsPhp\Exposition\Text\Interfaces\ProvidesMetricLines;
 

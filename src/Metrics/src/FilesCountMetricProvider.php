@@ -1,6 +1,6 @@
 <?php
 
-namespace rollun\logger\Metrics;
+namespace rollun\metrics;
 
 use OpenMetricsPhp\Exposition\Text\Collections\GaugeCollection;
 use OpenMetricsPhp\Exposition\Text\Interfaces\ProvidesMetricLines;
@@ -10,6 +10,8 @@ use OpenMetricsPhp\Exposition\Text\Types\MetricName;
 
 class FilesCountMetricProvider implements MetricProviderInterface
 {
+    use GetServiceName;
+
     /** @var string */
     protected $metricName;
 
@@ -39,25 +41,5 @@ class FilesCountMetricProvider implements MetricProviderInterface
                 Label::fromNameAndValue( 'service_name', $this->getServiceName() )
             )
         );
-    }
-
-    /**
-     * @throws \Exception
-     */
-    protected function getServiceName(): string
-    {
-        $serviceName = exec('hostname');
-
-        if ($serviceName === false) {
-            throw new \Exception("Can't get service name");
-        }
-
-        $serviceNameParts = explode('.', $serviceName);
-
-        if (!empty($serviceNameParts)) {
-            $serviceName = $serviceNameParts[0];
-        }
-
-        return str_replace('-', '_', $serviceName);
     }
 }

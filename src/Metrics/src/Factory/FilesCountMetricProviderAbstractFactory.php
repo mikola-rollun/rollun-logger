@@ -1,9 +1,9 @@
 <?php
 
-namespace rollun\logger\Metrics\Factory;
+namespace rollun\metrics\Factory;
 
 use Interop\Container\ContainerInterface;
-use rollun\logger\Metrics\FilesCountMetricProvider;
+use rollun\metrics\FilesCountMetricProvider;
 use rollun\utils\Factory\AbstractAbstractFactory;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 
