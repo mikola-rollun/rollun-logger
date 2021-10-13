@@ -70,7 +70,7 @@ class CallbackMetricProvider implements MetricProviderInterface
                     Counter::fromValue($metricValue)->withLabels($label)
                 );
             default:
-                throw new \Exception();
+                throw new \Exception("Unsupported metric type");
         }
     }
 }

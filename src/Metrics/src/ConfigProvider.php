@@ -7,6 +7,7 @@ use rollun\metrics\Callback\GetFailedProcessesCountCallback;
 use rollun\metrics\Factory\CallbackMetricProviderAbstractFactory;
 use rollun\metrics\Factory\FilesCountMetricProviderAbstractFactory;
 use rollun\metrics\Factory\MetricsMiddlewareAbstractFactory;
+use rollun\metrics\Factory\ProcessTrackerFactory;
 
 class ConfigProvider
 {
@@ -38,18 +39,20 @@ class ConfigProvider
     public function getDependencies(): array
     {
         return [
+            'aliases' => [
+                ProcessTrackerInterface::class => ProcessTracker::class,
+            ],
+            'invokables' => [
+                ClearOldProcessesDataCallback::class => ClearOldProcessesDataCallback::class,
+                GetFailedProcessesCountCallback::class => GetFailedProcessesCountCallback::class,
+            ],
+            'factories' => [
+                ProcessTracker::class => ProcessTrackerFactory::class,
+            ],
             'abstract_factories' => [
                 MetricsMiddlewareAbstractFactory::class,
                 FilesCountMetricProviderAbstractFactory::class,
                 CallbackMetricProviderAbstractFactory::class,
-            ],
-            'invokables' => [
-                ProcessTracker::class => ProcessTracker::class,
-                ClearOldProcessesDataCallback::class => ClearOldProcessesDataCallback::class,
-                GetFailedProcessesCountCallback::class => GetFailedProcessesCountCallback::class,
-            ],
-            'aliases' => [
-                ProcessTrackerInterface::class => ProcessTracker::class,
             ],
         ];
     }
