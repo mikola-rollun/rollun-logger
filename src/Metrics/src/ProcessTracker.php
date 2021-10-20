@@ -2,26 +2,27 @@
 
 namespace rollun\metrics;
 
+use OpenMetricsPhp\Exposition\Text\Collections\GaugeCollection;
+use OpenMetricsPhp\Exposition\Text\Metrics\Gauge;
+use OpenMetricsPhp\Exposition\Text\Types\Label;
+use OpenMetricsPhp\Exposition\Text\Types\MetricName;
 use rollun\logger\LifeCycleToken;
 
-class ProcessTracker implements ProcessTrackerInterface
+class ProcessTracker implements ProcessTrackerInterface, MetricsProviderInterface
 {
+    use GetServiceName;
+
     private const PROCESS_TRACKING_DIR = 'data/process-tracking/';
 
-    /** @var LifeCycleToken */
-    protected $lifeCycleToken;
-
     /** @var string */
-    protected $filePath;
+    protected static $filePath;
 
-    public function __construct(LifeCycleToken $lifeCycleToken)
+    /**
+     * TODO: make $lifeCycleToken optional
+     */
+    public static function storeProcessData(LifeCycleToken $lifeCycleToken)
     {
-        $this->lifeCycleToken = $lifeCycleToken;
-    }
-
-    public function storeProcessData()
-    {
-        $dirPath = $this->getProcessTrackingDir();
+        $dirPath = static::getProcessTrackingDir();
 
         $dirPath .= (new \DateTime())->format('Y-m-d') . '/';
 
@@ -32,12 +33,12 @@ class ProcessTracker implements ProcessTrackerInterface
             }
         }
 
-        $this->filePath = $dirPath . $this->lifeCycleToken->toString();
+        static::$filePath = $dirPath . $lifeCycleToken->toString();
 
-        $requestInfo = '';
+        $requestInfo = 'timestamp: ' . time() . PHP_EOL;
 
-        if (!empty($this->lifeCycleToken->getParentToken())) {
-            $requestInfo .= 'parent_lifecycle_token: ' . $this->lifeCycleToken->getParentToken() . PHP_EOL;
+        if (!empty($lifeCycleToken->getParentToken())) {
+            $requestInfo .= 'parent_lifecycle_token: ' . $lifeCycleToken->getParentToken() . PHP_EOL;
         }
 
         if (!empty($_SERVER['REMOTE_ADDR'])) {
@@ -48,40 +49,20 @@ class ProcessTracker implements ProcessTrackerInterface
             $requestInfo .= 'REQUEST_URI: ' . $_SERVER['REQUEST_URI'] . PHP_EOL;
         }
 
-        file_put_contents($this->filePath, $requestInfo);
+        file_put_contents(static::$filePath, $requestInfo);
     }
 
-    public function clearProcessData()
+    public static function clearProcessData()
     {
-        if (!is_string($this->filePath)) {
+        if (!is_string(static::$filePath)) {
             return;
         }
-        unlink($this->filePath);
+        unlink(static::$filePath);
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function getFailedProcessesCount(): int
+    public static function clearOldProcessesData()
     {
-        $dirPath = $this->getProcessTrackingDir();
-
-        $filesCount = exec("find $dirPath -type f | wc -l");
-
-        if ($filesCount === false) {
-            throw new \Exception("Can't get files count for dir '$dirPath'");
-        }
-
-        if (!is_numeric($filesCount)) {
-            throw new \Exception("Files count must be numeric");
-        }
-
-        return (int)$filesCount;
-    }
-
-    public function clearOldProcessesData()
-    {
-        $dirPath = $this->getProcessTrackingDir();
+        $dirPath = static::getProcessTrackingDir();
 
         $dirsByDate = glob($dirPath . '*', GLOB_ONLYDIR);
 
@@ -110,7 +91,42 @@ class ProcessTracker implements ProcessTrackerInterface
         }
     }
 
-    protected function getProcessTrackingDir(): string
+    /**
+     * @throws \Exception
+     */
+    public function getMetrics(): array
+    {
+        return [
+            GaugeCollection::fromGauges(
+                MetricName::fromString('failed_processes'),
+                Gauge::fromValue(static::getFailedProcessesCount())->withLabels(
+                    Label::fromNameAndValue('service_name', static::getServiceName())
+                )
+            )
+        ];
+    }
+
+    /**
+     * @throws \Exception
+     */
+    protected static function getFailedProcessesCount(): int
+    {
+        $dirPath = static::getProcessTrackingDir();
+
+        $filesCount = exec("find $dirPath -type f | wc -l");
+
+        if ($filesCount === false) {
+            throw new \Exception("Can't get files count for dir '$dirPath'");
+        }
+
+        if (!is_numeric($filesCount)) {
+            throw new \Exception("Files count must be numeric");
+        }
+
+        return (int)$filesCount;
+    }
+
+    protected static function getProcessTrackingDir(): string
     {
         return self::PROCESS_TRACKING_DIR;
     }

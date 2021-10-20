@@ -12,8 +12,8 @@ use rollun\dic\InsideConstruct;
 
 class MetricsMiddleware implements MiddlewareInterface
 {
-    /** @var array<MetricProviderInterface> */
-    protected $metricProviders;
+    /** @var array<MetricsProviderInterface> */
+    protected $metricsProviders;
 
     /** @var LoggerInterface */
     protected $logger;
@@ -21,9 +21,9 @@ class MetricsMiddleware implements MiddlewareInterface
     /**
      * @throws \ReflectionException
      */
-    public function __construct(array $metricProviders, LoggerInterface $logger = null)
+    public function __construct(array $metricsProviders, LoggerInterface $logger = null)
     {
-        $this->metricProviders = $metricProviders;
+        $this->metricsProviders = $metricsProviders;
         InsideConstruct::init([
             'logger' => LoggerInterface::class,
         ]);
@@ -33,11 +33,11 @@ class MetricsMiddleware implements MiddlewareInterface
     {
         $metrics = [];
 
-        foreach ($this->metricProviders as $metricProvider) {
+        foreach ($this->metricsProviders as $metricsProvider) {
             try {
-                $metrics[] = $metricProvider->getMetric();
+                $metrics = array_merge($metrics, $metricsProvider->getMetrics());
             } catch (\Throwable $e) {
-                $this->logger->warning("Can't get metric", [
+                $this->logger->warning("Can't get metrics", [
                     'exception' => $e
                 ]);
                 continue;

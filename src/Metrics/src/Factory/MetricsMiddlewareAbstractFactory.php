@@ -3,7 +3,7 @@
 namespace rollun\metrics\Factory;
 
 use Interop\Container\ContainerInterface;
-use rollun\metrics\MetricProviderInterface;
+use rollun\metrics\MetricsProviderInterface;
 use rollun\metrics\MetricsMiddleware;
 use rollun\utils\Factory\AbstractAbstractFactory;
 use Zend\ServiceManager\Exception\ServiceNotCreatedException;
@@ -35,7 +35,7 @@ class MetricsMiddlewareAbstractFactory extends AbstractAbstractFactory
 
         foreach ($metricProviderClasses as $metricProviderClass) {
             $metricProvider = $container->get($metricProviderClass);
-            if (!$metricProvider instanceof MetricProviderInterface) {
+            if (!$metricProvider instanceof MetricsProviderInterface) {
                 throw new ServiceNotCreatedException("Dependency '$metricProvidersField' contains object that is not implementing required interface");
             }
             $metricProviders[] = $metricProvider;

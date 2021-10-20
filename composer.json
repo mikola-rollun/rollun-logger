@@ -56,6 +56,15 @@
       "rollun\\test\\logger\\": "test/Logger"
     }
   },
+  "extra": {
+    "zf": {
+      "config-provider": [
+        "rollun\\logger\\ConfigProvider",
+        "rollun\\tracer\\ConfigProvider",
+        "rollun\\metrics\\ConfigProvider"
+      ]
+    }
+  },
   "scripts": {
     "test": "phpunit --colors=always",
     "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",

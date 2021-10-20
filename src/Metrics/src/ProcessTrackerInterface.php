@@ -2,13 +2,13 @@
 
 namespace rollun\metrics;
 
+use rollun\logger\LifeCycleToken;
+
 interface ProcessTrackerInterface
 {
-    public function storeProcessData();
+    public static function storeProcessData(LifeCycleToken $lifeCycleToken);
 
-    public function clearProcessData();
+    public static function clearProcessData();
 
-    public function clearOldProcessesData();
-
-    public function getFailedProcessesCount(): int;
+    public static function clearOldProcessesData();
 }

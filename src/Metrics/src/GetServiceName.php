@@ -7,7 +7,7 @@ trait GetServiceName
     /**
      * @throws \Exception
      */
-    protected function getServiceName(): string
+    protected static function getServiceName(): string
     {
         $serviceName = exec('hostname');
 
