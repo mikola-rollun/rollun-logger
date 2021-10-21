@@ -123,7 +123,8 @@ class ProcessTracker implements ProcessTrackerInterface, MetricsProviderInterfac
             throw new \Exception("Files count must be numeric");
         }
 
-        return (int)$filesCount;
+        // отнимаем 1 чтобы не учитывать текущий процесс
+        return (int)$filesCount - 1;
     }
 
     protected static function getProcessTrackingDir(): string
